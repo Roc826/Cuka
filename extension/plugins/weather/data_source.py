@@ -2,45 +2,58 @@ import json
 import requests
 import os
 
-async def get_weather_of_city(city: str) -> str:
+async def get_weather_of_city(city: str,date: int=0) -> str:
     citycode=getCityCode(city)
     if citycode:
         api = 'http://t.weather.sojson.com/api/weather/city/{}'.format(str(citycode))
         req = requests.get(api)
         weather = json.loads(req.text)
-        ans = "日期:{ymd}  {week}\n" \
-              "天气:{type}\n" \
-              "当前温度:{wendu}\n" \
-              "空气质量:{quality}\n" \
-              "最高温:{high}\n" \
-              "最低温:{low}\n" \
-              "湿度:{shidu}\n" \
-              "风向:{fx}\n" \
-              "风力:{fl}\n" \
-              "pm2.5:{pm25}\n" \
-              "pm10:{pm10}\n" \
-              "aqi:{aqi}\n" \
-              "日出:{sunrise}\n" \
-              "日落:{sunset}\n" \
-              "注意事项:{notice}\n"
-        ans =ans.format(
-            ymd=weather['data']['forecast'][0]['ymd'],
-            week=weather['data']['forecast'][0]['week'],
-            type=weather['data']['forecast'][0]['type'],
-            wendu=weather['data']['wendu'],
-            quality=weather['data']['quality'],
-            high=weather['data']['forecast'][0]['high'],
-            low=weather['data']['forecast'][0]['low'],
-            shidu=weather['data']['shidu'],
-            fx=weather['data']['forecast'][0]['fx'],
-            fl=weather['data']['forecast'][0]['fl'],
-            pm25=weather['data']['pm25'],
-            pm10=weather['data']['pm10'],
-            aqi=weather['data']['forecast'][0]['aqi'],
-            sunrise=weather['data']['forecast'][0]['sunrise'],
-            sunset=weather['data']['forecast'][0]['sunset'],
-            notice=weather['data']['forecast'][0]['notice']
-        )
+        today=['日期', '天气', '当前温度', '空气质量', '最高温', '最低温', '湿度', '风向', '风力', 'pm2.5', 'pm10', 'aqi', '日出', '日落', '注意事项']
+        otherday = ['日期', '天气', '最高温', '最低温', '风向', '风力', 'aqi', '日出', '日落', '注意事项']
+
+        base = {"日期": "{ymd}  {week}",
+              "天气": "{type}",
+              "当前温度": "{wendu}",
+              "空气质量": "{quality}",
+              "最高温": "{high}",
+              "最低温": "{low}",
+              "湿度": "{shidu}",
+              "风向": "{fx}",
+              "风力": "{fl}",
+              "pm2.5": "{pm25}",
+              "pm10": "{pm10}",
+              "aqi": "{aqi}",
+              "日出": "{sunrise}",
+              "日落": "{sunset}",
+              "注意事项": "{notice}"}
+
+        info = {
+            "wendu": weather['data']['wendu'],
+            "shidu": weather['data']['shidu'],
+            "quality": weather['data']['quality'],
+            "pm25": weather['data']['pm25'],
+            "pm10": weather['data']['pm10'],
+            "ymd":weather['data']['forecast'][date]['ymd'],
+            "week":weather['data']['forecast'][date]['week'],
+            "type":weather['data']['forecast'][date]['type'],
+            "high":weather['data']['forecast'][date]['high'],
+            "low":weather['data']['forecast'][date]['low'],
+            "fx":weather['data']['forecast'][date]['fx'],
+            "fl":weather['data']['forecast'][date]['fl'],
+            "aqi":weather['data']['forecast'][date]['aqi'],
+            "sunrise":weather['data']['forecast'][date]['sunrise'],
+            "sunset":weather['data']['forecast'][date]['sunset'],
+            "notice":weather['data']['forecast'][date]['notice']
+        }
+
+        ans = ''
+        if date == 0:
+            for type in today:
+                ans += type + ':' + base[type] + '\n'
+        else:
+            for type in otherday:
+                ans += type + ':' + base[type] + '\n'
+        ans = ans.format(**info).rstrip('\n')
         return ans
     else:
         return "抱歉没能查到这个城市呢"
@@ -55,3 +68,10 @@ def getCityCode(cityname:str):
                 return city['编码']
 
     return False
+
+def is_json(myjson):
+    try:
+        json_object = json.loads(myjson)
+    except ValueError as e:
+        return False
+    return True
