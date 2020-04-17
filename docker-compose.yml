@@ -1,0 +1,12 @@
+version: '2'
+services:
+    coolq:
+        image: coolq/wine-coolq
+        container_name: "coolq"
+        ports:
+            - 18080:9000
+        volumes:
+            - ./data/:/home/user/coolq 
+        environment:
+            - VNC_PASSWD=123456
+            - COOLQ_ACCOUNT=123456
